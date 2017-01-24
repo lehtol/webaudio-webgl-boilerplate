@@ -45,9 +45,12 @@
    			uniform vec2 resolution;
 
 				vec4 getProx(float x, float y){
-					float fft = texture2D(audio, vec2(y/2.0, 0.0)).y;
-					fft = clamp(fft, 0.0, 1.0);
-					vec4 ret = vec4(y*fft, (1.0-y)*fft, 0.5*x*fft, .004);
+					float fftL = texture2D(audio, vec2((y/2.0), 0.0)).a;
+					float fftR = texture2D(audio, vec2((y/4.0)+0.5, 0.0)).a;
+					fftL = clamp(fftL, 0.0, 1.0);
+					fftR = clamp(fftR, 0.0, 1.0);
+					float fft = ((1.0 - x) * fftL) + (x * fftR);
+					vec4 ret = vec4(y*fft, (1.0-y)*fft, 0.5*x*fft, 1.0);
 					return ret;
 
 				}
