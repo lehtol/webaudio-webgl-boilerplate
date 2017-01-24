@@ -18,7 +18,7 @@ Player.prototype.decode = function( myAudio ) {
     this.analyser = this.ac.createAnalyser();
     this.source.connect(this.analyser);
     this.source.connect(this.ac.destination);
-    this.analyser.fftSize = 1024;
+    this.analyser.fftSize = 4096;
     this.bufferLength = this.analyser.frequencyBinCount;
 
     this.dataArray = new Uint8Array(this.analyser.fftSize);
@@ -175,18 +175,17 @@ parameters = {
     }
     //this.player.dataArray = new Uint8Array(this.player.bufferLength);
     this.player.analyser.getByteFrequencyData(this.player.dataArray);
-    let outputData = new Float32Array(this.player.dataArray.length);
-    for (i = 0; i < this.player.dataArray.length; i++) {
-    outputData[i] = (this.player.dataArray[i]) / 256.0;
-  }
-return outputData;
-    /*
+    //let outputData = new Float32Array(this.player.dataArray.length);
+    //for (i = 0; i < this.player.dataArray.length; i++) {
+    //  outputData[i] = (this.player.dataArray[i]) / 256.0;
+    //}
+//return outputData;
     let texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, this.player.dataArray);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, this.player.dataArray);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    return texture;*/
+    return texture;
   }
 
   function createProgram( vertex, fragment ) {
@@ -252,8 +251,7 @@ return outputData;
       gl.uniform1f( timeLocation, parameters.time );
       gl.uniform2f( resolutionLocation, parameters.screenWidth, parameters.screenHeight );
       let audioTexture = this.createAudioTexture();
-      console.log(audioTexture),
-      gl.uniform1fv( audioTextureLocation, audioTexture)
+      gl.uniform1i(audioTextureLocation, audioTexture);
       // Render geometry
       gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
       gl.vertexAttribPointer( vertex_position, 2, gl.FLOAT, false, 0, 0 );
