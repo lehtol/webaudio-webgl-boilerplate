@@ -1,0 +1,67 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>WebGL Boilerplate</title>
+
+		<style>
+			html, body {
+				background-color: #000000;
+				margin: 0px;
+				overflow: hidden;
+				width: 100%;
+				height: 100%;
+			}
+			canvas {
+				width: 100%;
+				height: 100%;
+			}
+		</style>
+	</head>
+	<body>
+<audio>
+  <source src="file:///" type="audio/mp3">
+</audio>
+		<canvas></canvas>
+		<div id="info"></div>
+
+		<script id="vs" type="x-shader/vertex">
+
+   			attribute vec3 position;
+
+   			void main() {
+
+   				gl_Position = vec4( position, 1.0 );
+
+   			}
+
+   		</script>
+
+   		<script id="fs" type="x-shader/fragment">
+
+   			uniform float time;
+				uniform float audio[512];
+   			uniform vec2 resolution;
+
+
+   			void main( void ) {
+
+   				vec2 position = - 1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;
+   				//float red = abs( sin( position.x * position.y + time / 5.0 ) );
+					//float red = abs( sin( audio[0] * audio[10] + time / 5.0 ) );
+   				//float green = abs( sin( audio[0] * audio[10] + time / 4.0 ) );
+   				//float blue = abs( sin( audio[0] * audio[10] + time / 3.0 ) );
+					float red = position.x * audio[0];
+					float green = position.y * audio[15];
+					float blue = position.y * position.x * audio[30];
+   				gl_FragColor = vec4( red, green, blue, 0.001 );
+
+   			}
+
+   		</script>
+
+   		<script src="./app.js" ></script>
+
+	</body>
+</html>
