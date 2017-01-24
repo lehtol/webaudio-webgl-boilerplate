@@ -21,8 +21,10 @@ Player.prototype.decode = function( myAudio ) {
     this.analyser.fftSize = 4096;
     this.bufferLength = this.analyser.frequencyBinCount;
 
-    this.dataArray = new Uint8Array(this.analyser.fftSize);
-    this.analyser.getByteFrequencyData(this.dataArray);
+    this.byteFrequencyDataArray = new Uint8Array(this.analyser.fftSize);
+    this.timeDomainDataArray = new Uint8Array(this.analyser.fftSize);
+    this.analyser.getByteFrequencyData(this.byteFrequencyDataArray);
+    this.analyser.getByteTimeDomainData(this.timeDomainDataArray);
 
     this.play();
 };
@@ -174,7 +176,16 @@ parameters = {
       return null;
     }
     //this.player.dataArray = new Uint8Array(this.player.bufferLength);
-    this.player.analyser.getByteFrequencyData(this.player.dataArray);
+    this.player.analyser.getByteFrequencyData(this.player.byteFrequencyDataArray);
+    this.player.analyser.getByteTimeDomainData(this.player.timeDomainDataArray);
+
+    const bfd = this.player.byteFrequencyDataArray;
+    const tdd = this.player.timeDomainDataArray;
+
+    let totalLength = bfd.length + tdd.length;
+    let res = new Uint8Array(totalLength);
+    res.set(bfd);
+    res.set(tdd, bfd.length);
     //let outputData = new Float32Array(this.player.dataArray.length);
     //for (i = 0; i < this.player.dataArray.length; i++) {
     //  outputData[i] = (this.player.dataArray[i]) / 256.0;
@@ -182,7 +193,7 @@ parameters = {
 //return outputData;
     let texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1024, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, this.player.dataArray);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1024, 2, 0, gl.RGBA, gl.UNSIGNED_BYTE, res);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     return texture;
