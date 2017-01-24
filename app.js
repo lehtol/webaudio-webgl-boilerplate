@@ -4,23 +4,12 @@ var myAudio = document.querySelector('audio');
 
 function Player ( el ) {
   this.ac = new ( window.AudioContext || webkitAudioContext )();
-  /*this.el = el;
-  this.button = el.querySelector('.button');
-  this.track = el.querySelector('.track');
-  this.progress = el.querySelector('.progress');
-  this.scrubber = el.querySelector('.scrubber');
-  this.message = el.querySelector('.message');
-  this.message.innerHTML = 'Loading';*/
   this.bindEvents();
-  //this.fetch();
   this.decode(myAudio);
 }
 
 Player.prototype.bindEvents = function() {
   window.addEventListener('click', this.click.bind(this));
-  //window.addEventListener('mousedown', this.onMouseDown.bind(this));
-  /*window.addEventListener('mousemove', this.onDrag.bind(this));
-  window.addEventListener('mouseup', this.onMouseUp.bind(this));*/
 };
 
 Player.prototype.decode = function( myAudio ) {
