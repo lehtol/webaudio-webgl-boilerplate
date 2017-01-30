@@ -44,13 +44,14 @@
 				uniform sampler2D audio;
    			uniform vec2 resolution;
 
-				vec4 getProx(float x, float y){
-					float fftL = texture2D(audio, vec2((y/2.0), 0.0)).a;
-					float fftR = texture2D(audio, vec2((y/4.0)+0.5, 0.0)).a;
-					fftL = clamp(fftL, 0.0, 1.0);
-					fftR = clamp(fftR, 0.0, 1.0);
-					float fft = ((1.0 - x) * fftL) + (x * fftR);
-					vec4 ret = vec4(y*fft, (1.0-y)*fft, 0.5*x*fft, 1.0);
+				vec4 getVis(float x, float y){
+					float wave = texture2D( audio, vec2(x/2.0,0.75) ).a; //Waveform data is on the first line.
+					float fft  = texture2D( audio, vec2(1.0-x,0.25) ).a; //FFT on second.
+
+					vec3 col = vec3( fft-x, fft/1.4, fft+(1.0-x) );
+					float waveForm = 1.0 - smoothstep( 0.0, 0.15, abs(wave - y) );
+					col += vec3(waveForm-x, waveForm/3.0, x-waveForm);
+					vec4 ret = vec4(col,1.0);
 					return ret;
 
 				}
@@ -58,8 +59,8 @@
    			void main( void ) {
 
    				vec2 position = gl_FragCoord.xy / resolution.xy;
-					vec4 heat = getProx(position.x, position.y);
-   				gl_FragColor = heat;
+					vec4 col = getVis(position.x, position.y);
+   				gl_FragColor = col*0.9;
 
    			}
 
