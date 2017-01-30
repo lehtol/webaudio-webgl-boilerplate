@@ -18,7 +18,7 @@ Player.prototype.decode = function( myAudio ) {
     this.analyser = this.ac.createAnalyser();
     this.source.connect(this.analyser);
     this.source.connect(this.ac.destination);
-    this.analyser.fftSize = 4096;
+    this.analyser.fftSize = 4096*2;
     this.bufferLength = this.analyser.frequencyBinCount;
 
     this.byteFrequencyDataArray = new Uint8Array(this.analyser.fftSize);
@@ -173,7 +173,6 @@ parameters = {
     if(!this.player.bufferLength){
       return null;
     }
-    //this.player.dataArray = new Uint8Array(this.player.bufferLength);
     this.player.analyser.getByteFrequencyData(this.player.byteFrequencyDataArray);
     this.player.analyser.getByteTimeDomainData(this.player.timeDomainDataArray);
 
@@ -185,14 +184,9 @@ parameters = {
     let res = new Uint8Array(totalLength);
     res.set(tdd);
     res.set(bfd, tdd.length);
-    //let outputData = new Float32Array(this.player.dataArray.length);
-    //for (i = 0; i < this.player.dataArray.length; i++) {
-    //  outputData[i] = (this.player.dataArray[i]) / 256.0;
-    //}
-//return outputData;
     let texture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.ALPHA, totalLength, 1, 0, gl.ALPHA, gl.UNSIGNED_BYTE, res);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.ALPHA, totalLength/2, 2, 0, gl.ALPHA, gl.UNSIGNED_BYTE, res);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     return texture;
@@ -250,8 +244,6 @@ parameters = {
 
     function render() {
       this.player.updatePosition();
-      //this.createAudioTexture();
-      //console.log(this.player.dataArray);
       if ( !currentProgram ) return;
       parameters.time = window.player.position;
       gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
