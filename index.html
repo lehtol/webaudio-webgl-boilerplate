@@ -45,8 +45,9 @@
    			uniform vec2 resolution;
 
 				vec4 getVis(float x, float y){
-					float wave = texture2D( audio, vec2(x/2.0,0.75) ).a; //Waveform data is on the first line.
-					float fft  = texture2D( audio, vec2(1.0-x,0.25) ).a; //FFT on second.
+					float fft  = texture2D( audio, vec2(1.0-x,0.25) ).a; //FFT on data is on the first line.
+					float wave = texture2D( audio, vec2(x/2.0,0.75) ).a; //Waveform second.
+					
 
 					vec3 col = vec3( fft-x, fft/1.4, fft+(1.0-x) );
 					float waveForm = 1.0 - smoothstep( 0.0, 0.15, abs(wave - y) );
