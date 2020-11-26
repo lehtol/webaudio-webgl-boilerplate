@@ -24,16 +24,15 @@ Player.prototype.decode = function( myAudio ) {
 
     this.byteFrequencyDataArray = new Uint8Array(this.analyser.fftSize);
     this.timeDomainDataArray = new Uint8Array(this.analyser.fftSize);
-
-    // this.play();
 };
 
 Player.prototype.play = function( position ) {
   this.position = typeof position === 'number' ? position : this.position || 0;
   this.startTime = this.ac.currentTime - ( this.position || 0 );
   this.audio.play();
-
   this.playing = true;
+  const playButton = document.getElementById("playButton");
+  playButton.style.display = 'none';
 };
 
 Player.prototype.pause = function() {
@@ -42,6 +41,8 @@ Player.prototype.pause = function() {
     this.position = this.ac.currentTime - this.startTime;
     this.playing = false;
   }
+  const playButton = document.getElementById("playButton");
+  playButton.style.display = 'absolute';
 };
 
 Player.prototype.seek = function( time ) {
@@ -138,12 +139,12 @@ parameters = {
     vertex_shader = document.getElementById('vs').textContent;
     fragment_shader = document.getElementById('fs').textContent;
 
-    canvas = document.querySelector( 'canvas' );
+    canvas = document.querySelector('canvas');
     // Initialise WebGL
     try {
-      gl = canvas.getContext( 'webgl' );
-    } catch( error ) { }
-    if ( !gl ) {
+      gl = canvas.getContext('webgl');
+    } catch(error) {}
+    if (!gl) {
       throw "cannot create webgl context";
     }
 

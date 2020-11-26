@@ -3,8 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-		<title>WebGL Boilerplate</title>
-
+		<title>Simple WebGL audio visualization example</title>
 		<style>
 			html, body {
 				background-color: #000000;
@@ -32,56 +31,67 @@
     		text-decoration: none;
 				color: white;
 			}
+			#buttonContainer {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				text-align: center;
+			}
+			#playButton {
+				text-align: center;
+			  box-sizing: border-box;
+			  width: 74px;
+			  height: 74px;
+				top: 50%;
+				left: 50%;
+				margin-left: auto;
+				margin-right: auto;
+				border-style: solid;
+  			border-color: transparent transparent transparent black;
+			  border-width: 37px 0px 37px 74px;
+				position: absolute;
+				pointer-events: none;
+				background: none !important;
+   			transform: translate(-50%, -50%);
+			}
 		</style>
 	</head>
 	<body>
+		<div id="buttonContainer"><div id="playButton"></div></div>
 	  <audio><source src="music01.mp3" type="audio/mp3"></audio>
 		<div id="info">
 		<a href="https://soundcloud.com/oskari-tapola">Music by </a>
 		<a id="name" href="https://soundcloud.com/oskari-tapola">Oskari Tapola</a></div>
 		<canvas></canvas>
 		<script id="vs" type="x-shader/vertex">
+ 			attribute vec3 position;
+ 			void main() {
+ 				gl_Position = vec4( position, 1.0 );
+ 			}
+ 		</script>
 
-   			attribute vec3 position;
+ 		<script id="fs" type="x-shader/fragment">
+ 			uniform float time;
+			uniform sampler2D audio;
+ 			uniform vec2 resolution;
 
-   			void main() {
+			vec4 getVis(float x, float y){
+				float fft  = texture2D( audio, vec2(1.0-x,0.25) ).a; //FFT on data is on the first line.
+				float wave = texture2D( audio, vec2(x/2.0,0.75) ).a; //Waveform second.
 
-   				gl_Position = vec4( position, 1.0 );
+				vec3 col = vec3( fft-x, fft/1.4, fft+(1.0-x) );
+				float waveForm = 1.0 - smoothstep( 0.0, 0.15, abs(wave - y) );
+				col += vec3(waveForm-x, waveForm/3.0, x-waveForm);
+				vec4 ret = vec4(col,1.0);
+				return ret;
+			}
 
-   			}
-
-   		</script>
-
-   		<script id="fs" type="x-shader/fragment">
-
-   			uniform float time;
-				uniform sampler2D audio;
-   			uniform vec2 resolution;
-
-				vec4 getVis(float x, float y){
-					float fft  = texture2D( audio, vec2(1.0-x,0.25) ).a; //FFT on data is on the first line.
-					float wave = texture2D( audio, vec2(x/2.0,0.75) ).a; //Waveform second.
-
-
-					vec3 col = vec3( fft-x, fft/1.4, fft+(1.0-x) );
-					float waveForm = 1.0 - smoothstep( 0.0, 0.15, abs(wave - y) );
-					col += vec3(waveForm-x, waveForm/3.0, x-waveForm);
-					vec4 ret = vec4(col,1.0);
-					return ret;
-
-				}
-
-   			void main( void ) {
-
-   				vec2 position = gl_FragCoord.xy / resolution.xy;
-					vec4 col = getVis(position.x, position.y);
-   				gl_FragColor = col*0.9;
-
-   			}
-
-   		</script>
-
-   		<script src="./app.js" ></script>
-
+ 			void main( void ) {
+ 				vec2 position = gl_FragCoord.xy / resolution.xy;
+				vec4 col = getVis(position.x, position.y);
+ 				gl_FragColor = col*0.9;
+ 			}
+ 		</script>
+ 		<script src="./app.js" ></script>
 	</body>
 </html>
