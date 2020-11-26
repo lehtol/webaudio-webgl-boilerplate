@@ -42,7 +42,7 @@ Player.prototype.pause = function() {
     this.playing = false;
   }
   const playButton = document.getElementById("playButton");
-  playButton.style.display = 'absolute';
+  playButton.style.display = 'block';
 };
 
 Player.prototype.seek = function( time ) {
