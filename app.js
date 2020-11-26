@@ -6,6 +6,7 @@ function Player ( el ) {
   this.ac = new ( window.AudioContext || webkitAudioContext )();
   this.bindEvents();
   this.decode(myAudio);
+  this.playing = false;
 }
 
 Player.prototype.bindEvents = function() {
@@ -24,20 +25,10 @@ Player.prototype.decode = function( myAudio ) {
     this.byteFrequencyDataArray = new Uint8Array(this.analyser.fftSize);
     this.timeDomainDataArray = new Uint8Array(this.analyser.fftSize);
 
-    this.play();
-};
-
-Player.prototype.connect = function() {
-  if ( this.playing ) {
-    this.pause();
-  }
-  else{
-    this.audio.play();
-  }
+    // this.play();
 };
 
 Player.prototype.play = function( position ) {
-  this.connect();
   this.position = typeof position === 'number' ? position : this.position || 0;
   this.startTime = this.ac.currentTime - ( this.position || 0 );
   this.audio.play();
@@ -150,7 +141,7 @@ parameters = {
     canvas = document.querySelector( 'canvas' );
     // Initialise WebGL
     try {
-      gl = canvas.getContext( 'experimental-webgl' );
+      gl = canvas.getContext( 'webgl' );
     } catch( error ) { }
     if ( !gl ) {
       throw "cannot create webgl context";
