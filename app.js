@@ -12,9 +12,7 @@ volumeControl.onchange = function(ev) {
 };
 
 function Player (el) {
-  this.ac = new (window.AudioContext || webkitAudioContext)();
   this.bindEvents();
-  this.decode(myAudio);
   this.playing = false;
   this.hasInit = false;
 };
@@ -99,9 +97,13 @@ Player.prototype.click = function(){
       alert('Web Audio API is not supported in this browser');
     }
     this.hasInit = true;
+    this.ac = new (window.AudioContext || webkitAudioContext)();
+    this.decode(myAudio);
     this.toggle();
   }
 }
+
+window.player = new Player(playerElement);
 
 Player.prototype.onMouseDown = function( e ) {
 };
@@ -112,8 +114,6 @@ Player.prototype.onDrag = function( e ) {
 Player.prototype.onMouseUp = function() {
 };
 
-
-window.player = new Player(playerElement);
 
 // Webkit/blink browsers need prefix, Safari won't work without window.
 window.requestAnimationFrame = window.requestAnimationFrame || ( function() {
@@ -145,125 +145,126 @@ parameters = {
   screenHeight: 0,
 };
 
-  init();
-  animate();
+init();
+animate();
 
-  function init() {
+function init() {
 
-    vertex_shader = document.getElementById('vs').textContent;
-    fragment_shader = document.getElementById('fs').textContent;
+  vertex_shader = document.getElementById('vs').textContent;
+  fragment_shader = document.getElementById('fs').textContent;
 
-    canvas = document.querySelector('canvas');
-    // Initialise WebGL
-    try {
-      gl = canvas.getContext('webgl');
-    } catch(error) {}
-    if (!gl) {
-      throw "cannot create webgl context";
-    }
-
-    // Create Vertex buffer (2 triangles)
-
-    buffer = gl.createBuffer();
-    gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
-    gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [ - 1.0, - 1.0, 1.0, - 1.0, - 1.0, 1.0, 1.0, - 1.0, 1.0, 1.0, - 1.0, 1.0 ] ), gl.STATIC_DRAW );
-
-    // Create Program
-    currentProgram = createProgram( vertex_shader, fragment_shader );
-    timeLocation = gl.getUniformLocation( currentProgram, 'time' );
-    resolutionLocation = gl.getUniformLocation( currentProgram, 'resolution' );
-    audioTextureLocation = gl.getUniformLocation( currentProgram, 'audio' );
+  canvas = document.querySelector('canvas');
+  // Initialise WebGL
+  try {
+    gl = canvas.getContext('webgl');
+  } catch(error) {}
+  if (!gl) {
+    throw "cannot create webgl context";
   }
 
-  function createAudioTexture(){
-    if(!this.player.bufferLength){
-      return null;
-    }
-    this.player.analyser.getByteFrequencyData(this.player.byteFrequencyDataArray);
-    this.player.analyser.getByteTimeDomainData(this.player.timeDomainDataArray);
+  // Create Vertex buffer (2 triangles)
 
+  buffer = gl.createBuffer();
+  gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
+  gl.bufferData( gl.ARRAY_BUFFER, new Float32Array( [ - 1.0, - 1.0, 1.0, - 1.0, - 1.0, 1.0, 1.0, - 1.0, 1.0, 1.0, - 1.0, 1.0 ] ), gl.STATIC_DRAW );
 
-    const bfd = this.player.byteFrequencyDataArray;
-    const tdd = this.player.timeDomainDataArray;
+  // Create Program
+  currentProgram = createProgram( vertex_shader, fragment_shader );
+  timeLocation = gl.getUniformLocation( currentProgram, 'time' );
+  resolutionLocation = gl.getUniformLocation( currentProgram, 'resolution' );
+  audioTextureLocation = gl.getUniformLocation( currentProgram, 'audio' );
+}
 
-    let totalLength = bfd.length + tdd.length;
-    let res = new Uint8Array(totalLength);
-    res.set(tdd);
-    res.set(bfd, tdd.length);
-    let texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.ALPHA, totalLength/2, 2, 0, gl.ALPHA, gl.UNSIGNED_BYTE, res);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    return texture;
+function createAudioTexture() {
+  if(!this.player.bufferLength) {
+    return null;
   }
+  this.player.analyser.getByteFrequencyData(this.player.byteFrequencyDataArray);
+  this.player.analyser.getByteTimeDomainData(this.player.timeDomainDataArray);
 
-  function createProgram( vertex, fragment ) {
 
-    var program = gl.createProgram();
-    var vs = createShader( vertex, gl.VERTEX_SHADER );
-    var fs = createShader( '#ifdef GL_ES\nprecision highp float;\n#endif\n\n' + fragment, gl.FRAGMENT_SHADER );
-    if ( vs == null || fs == null ) return null;
-    gl.attachShader( program, vs );
-    gl.attachShader( program, fs );
-    gl.deleteShader( vs );
-    gl.deleteShader( fs );
-    gl.linkProgram( program );
-    if ( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
-      alert( "ERROR:\n" +
-      "VALIDATE_STATUS: " + gl.getProgramParameter( program, gl.VALIDATE_STATUS ) + "\n" +
-      "ERROR: " + gl.getError() + "\n\n" +
-      "- Vertex Shader -\n" + vertex + "\n\n" +
-      "- Fragment Shader -\n" + fragment );
-      return null;
-    }
-    return program;
+  const bfd = this.player.byteFrequencyDataArray;
+  const tdd = this.player.timeDomainDataArray;
+
+  const totalLength = bfd.length + tdd.length;
+  const res = new Uint8Array(totalLength);
+  res.set(tdd);
+  res.set(bfd, tdd.length);
+  const texture = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.ALPHA, totalLength/2, 2, 0, gl.ALPHA, gl.UNSIGNED_BYTE, res);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  return texture;
+}
+
+function createProgram( vertex, fragment ) {
+
+  const program = gl.createProgram();
+  const vs = createShader( vertex, gl.VERTEX_SHADER );
+  const fs = createShader( '#ifdef GL_ES\nprecision highp float;\n#endif\n\n' + fragment, gl.FRAGMENT_SHADER );
+  if ( vs == null || fs == null ) return null;
+  gl.attachShader( program, vs );
+  gl.attachShader( program, fs );
+  gl.deleteShader( vs );
+  gl.deleteShader( fs );
+  gl.linkProgram( program );
+  if ( !gl.getProgramParameter( program, gl.LINK_STATUS ) ) {
+    alert( "ERROR:\n" +
+    "VALIDATE_STATUS: " + gl.getProgramParameter( program, gl.VALIDATE_STATUS ) + "\n" +
+    "ERROR: " + gl.getError() + "\n\n" +
+    "- Vertex Shader -\n" + vertex + "\n\n" +
+    "- Fragment Shader -\n" + fragment );
+    return null;
   }
+  return program;
+}
 
-  function createShader( src, type ) {
-    var shader = gl.createShader( type );
-    gl.shaderSource( shader, src );
-    gl.compileShader( shader );
-    if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
-      alert( ( type == gl.VERTEX_SHADER ? "VERTEX" : "FRAGMENT" ) + " SHADER:\n" + gl.getShaderInfoLog( shader ) );
-      return null;
-    }
-    return shader;
+function createShader( src, type ) {
+  const shader = gl.createShader( type );
+  gl.shaderSource( shader, src );
+  gl.compileShader( shader );
+  if ( !gl.getShaderParameter( shader, gl.COMPILE_STATUS ) ) {
+    alert( ( type == gl.VERTEX_SHADER ? "VERTEX" : "FRAGMENT" ) + " SHADER:\n" + gl.getShaderInfoLog( shader ) );
+    return null;
   }
+  return shader;
+}
 
-  function resizeCanvas( event ) {
-    if ( canvas.width != canvas.clientWidth ||
-      canvas.height != canvas.clientHeight ) {
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-        parameters.screenWidth = canvas.width;
-        parameters.screenHeight = canvas.height;
-        gl.viewport( 0, 0, canvas.width, canvas.height );
-      }
+function resizeCanvas( event ) {
+  if ( canvas.width != canvas.clientWidth ||
+    canvas.height != canvas.clientHeight ) {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      parameters.screenWidth = canvas.width;
+      parameters.screenHeight = canvas.height;
+      gl.viewport( 0, 0, canvas.width, canvas.height );
     }
+}
 
-    function animate() {
-      resizeCanvas();
-      render();
-      requestAnimationFrame( animate );
-    }
+function animate() {
+  resizeCanvas();
+  render();
+  requestAnimationFrame( animate );
+}
 
-    function render() {
-      this.player.updatePosition();
-      if ( !currentProgram ) return;
-      parameters.time = window.player.position;
-      gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
-      // Load program into GPU
-      gl.useProgram( currentProgram );
-      // Set values to program variables
-      gl.uniform1f( timeLocation, parameters.time );
-      gl.uniform2f( resolutionLocation, parameters.screenWidth, parameters.screenHeight );
-      let audioTexture = this.createAudioTexture();
-      gl.uniform1i(audioTextureLocation, audioTexture);
-      // Render geometry
-      gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
-      gl.vertexAttribPointer( vertex_position, 2, gl.FLOAT, false, 0, 0 );
-      gl.enableVertexAttribArray( vertex_position );
-      gl.drawArrays( gl.TRIANGLES, 0, 6 );
-      gl.disableVertexAttribArray( vertex_position );
-    }
+function render() {
+  if (!this.hasInit) return;
+  this.player.updatePosition();
+  if ( !currentProgram ) return;
+  parameters.time = window.player.position;
+  gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
+  // Load program into GPU
+  gl.useProgram( currentProgram );
+  // Set values to program variables
+  gl.uniform1f( timeLocation, parameters.time );
+  gl.uniform2f( resolutionLocation, parameters.screenWidth, parameters.screenHeight );
+  let audioTexture = this.createAudioTexture();
+  gl.uniform1i(audioTextureLocation, audioTexture);
+  // Render geometry
+  gl.bindBuffer( gl.ARRAY_BUFFER, buffer );
+  gl.vertexAttribPointer( vertex_position, 2, gl.FLOAT, false, 0, 0 );
+  gl.enableVertexAttribArray( vertex_position );
+  gl.drawArrays( gl.TRIANGLES, 0, 6 );
+  gl.disableVertexAttribArray( vertex_position );
+}
