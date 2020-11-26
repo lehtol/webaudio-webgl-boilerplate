@@ -100,6 +100,9 @@ Player.prototype.click = function(){
     this.ac = new (window.AudioContext || webkitAudioContext)();
     this.decode(myAudio);
     this.toggle();
+
+    init();
+    animate();
   }
 }
 
@@ -145,8 +148,6 @@ parameters = {
   screenHeight: 0,
 };
 
-init();
-animate();
 
 function init() {
 
@@ -244,12 +245,13 @@ function resizeCanvas( event ) {
 
 function animate() {
   resizeCanvas();
-  render();
-  requestAnimationFrame( animate );
+  if (this.player.hasInit) {
+    render();
+    requestAnimationFrame( animate );
+  }
 }
 
 function render() {
-  if (!this.hasInit) return;
   this.player.updatePosition();
   if ( !currentProgram ) return;
   parameters.time = window.player.position;
