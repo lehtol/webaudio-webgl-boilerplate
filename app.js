@@ -16,6 +16,7 @@ function Player (el) {
   this.bindEvents();
   this.decode(myAudio);
   this.playing = false;
+  this.hasInit = false;
 };
 
 Player.prototype.bindEvents = function() {
@@ -77,15 +78,29 @@ Player.prototype.updatePosition = function() {
 };
 
 Player.prototype.toggle = function() {
-  if ( !this.playing ) {
-    this.play();
-  }
-  else {
-    this.pause();
-  }
+    if (!this.playing) {
+      this.play();
+    }
+    else {
+      this.pause();
+    }
 };
+
 Player.prototype.click = function(){
-  this.toggle();
+  if (this.hasInit) {
+    this.toggle();
+  } else {
+    try {
+      // Fix up for prefixing
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      //context = new AudioContext();
+    }
+    catch(e) {
+      alert('Web Audio API is not supported in this browser');
+    }
+    this.hasInit = true;
+    this.toggle();
+  }
 }
 
 Player.prototype.onMouseDown = function( e ) {
@@ -99,18 +114,6 @@ Player.prototype.onMouseUp = function() {
 
 
 window.player = new Player(playerElement);
-
-window.addEventListener('load', init, false);
-function init() {
-  try {
-    // Fix up for prefixing
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    //context = new AudioContext();
-  }
-  catch(e) {
-    alert('Web Audio API is not supported in this browser');
-  }
-}
 
 // Webkit/blink browsers need prefix, Safari won't work without window.
 window.requestAnimationFrame = window.requestAnimationFrame || ( function() {
