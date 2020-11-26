@@ -7,6 +7,7 @@ myAudio.volume = 0.5;
 volumeControl.value = 50;
 
 volumeControl.onchange = function(ev) {
+  ev.stopPropagation();
   myAudio.volume = ev.target.value / 100;
 };
 
@@ -18,7 +19,8 @@ function Player (el) {
 };
 
 Player.prototype.bindEvents = function() {
-  window.addEventListener('click', this.click.bind(this));
+  const canvas = document.getElementById('mainCanvas');
+  canvas.addEventListener('click', this.click.bind(this));
 };
 
 Player.prototype.decode = function( myAudio ) {
