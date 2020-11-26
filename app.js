@@ -1,13 +1,18 @@
 playerElement = document.querySelector('.player');
 
-var myAudio = document.querySelector('audio');
+const myAudio = document.querySelector('audio');
+const volunmeControl = document.getElementById('volumeControl');
 
-function Player ( el ) {
-  this.ac = new ( window.AudioContext || webkitAudioContext )();
+volumeControl.onchange = function(ev) {
+  myAudio.volume = ev.target.value / 100;
+};
+
+function Player (el) {
+  this.ac = new (window.AudioContext || webkitAudioContext)();
   this.bindEvents();
   this.decode(myAudio);
   this.playing = false;
-}
+};
 
 Player.prototype.bindEvents = function() {
   window.addEventListener('click', this.click.bind(this));
@@ -100,6 +105,8 @@ function init() {
   catch(e) {
     alert('Web Audio API is not supported in this browser');
   }
+  myAudio.volume = 0.5;
+  getElementById('voluControl').value = 50;
 }
 // Webkit/blink browsers need prefix, Safari won't work without window.
 window.requestAnimationFrame = window.requestAnimationFrame || ( function() {

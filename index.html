@@ -22,7 +22,8 @@
 				color: white;
 				position: absolute;
 				height: 20px;
-				background-color: rgba(0,0,0,0.3)
+				background-color: rgb(0.5,0.5,0.5);
+				padding: 2px 4px 2px 4px;
 			}
 			#name {
 				font-size: 16px;
@@ -54,10 +55,14 @@
 				background: none !important;
    			transform: translate(-50%, -50%);
 			}
+			#volumeControl {
+				position: absolute;
+			}
 		</style>
 	</head>
 	<body>
 		<div id="buttonContainer"><div id="playButton"></div></div>
+		<input id="volumeControl" type="range" min="0" max="100" step="1" value="50"></input>
 	  <audio><source src="music01.mp3" type="audio/mp3"></audio>
 		<div id="info">
 		<a href="https://soundcloud.com/oskari-tapola">Music by </a>
