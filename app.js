@@ -3,10 +3,10 @@ playerElement = document.querySelector('.player');
 const myAudio = document.querySelector('audio');
 const volumeControl = document.getElementById('volumeControl');
 
-myAudio.volume = 0.5;
-volumeControl.value = 50;
+myAudio.volume = 0.3;
+volumeControl.value = 30;
 
-volumeControl.onchange = function(ev) {
+volumeControl.oninput = function(ev) {
   ev.stopPropagation();
   myAudio.volume = ev.target.value / 100;
 };
