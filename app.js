@@ -96,12 +96,12 @@ Player.prototype.click = function(){
     catch(e) {
       alert('Web Audio API is not supported in this browser');
     }
-    this.hasInit = true;
     this.ac = new (window.AudioContext || webkitAudioContext)();
     this.decode(myAudio);
     this.toggle();
 
     init();
+    this.hasInit = true;
     animate();
   }
 }
